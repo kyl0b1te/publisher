@@ -10,10 +10,10 @@ export async function publish(): Promise<void> {
 
   const tmpSourcePath = '/tmp/src';
 
-  let ok = await sources.loadTo(tmpSourcePath);
-  console.log(`Finished with status: ${ok}`);
+  const loaded = await sources.loadTo(tmpSourcePath);
+  console.log(`Finished with status: ${loaded}`);
 
-  if (ok) {
+  if (loaded) {
     sources.makeStaticFrom(tmpSourcePath);
   }
 }

@@ -6,6 +6,8 @@ import S3 from 'aws-sdk/clients/s3';
 
 export class Sources {
 
+  private srcArchivePath = '/tmp/src.zip';
+
   constructor(
     private s3KeyParams: S3.GetObjectRequest,
     private s3Config: S3.ClientConfiguration = { apiVersion: '2006-03-01' }
@@ -13,13 +15,11 @@ export class Sources {
 
   async loadTo(srcPath: string): Promise<boolean> {
 
-    const tmpFileName = '/tmp/src.zip';
-
     try {
-      const data = await this.load();
-      await this.save(tmpFileName, data);
+      const data = await this.load(this.s3KeyParams, this.s3Config);
+      await this.save(this.srcArchivePath, data);
 
-      return await this.unpack(tmpFileName, srcPath);
+      return await this.unpack(this.srcArchivePath, srcPath);
     } catch (err) {
       console.error(err);
 
@@ -31,12 +31,11 @@ export class Sources {
 
   }
 
-  private load(): Promise<S3.Body> {
+  private load(params: S3.GetObjectRequest, config: S3.ClientConfiguration): Promise<S3.Body> {
 
     return new Promise((resolve, reject) => {
 
-      const s3Client = new S3(this.s3Config);
-      s3Client.getObject(this.s3KeyParams, (err: AWSError, data: S3.GetObjectOutput) => {
+      (new S3(config)).getObject(params, (err: AWSError, data: S3.GetObjectOutput) => {
 
         if (err != null) {
           return reject(err);
@@ -74,7 +73,11 @@ export class Sources {
   private cleanUp(tmpFilePath: string): Promise<boolean> {
 
     return new Promise((resolve) => {
-      spawn('rm', [tmpFilePath]).on('exit', (code: number) => resolve(code === 0));
+
+      spawn('rm', [tmpFilePath]).on('exit', (code: number) => {
+
+        return resolve(code === 0);
+      });
     });
   }
 }
