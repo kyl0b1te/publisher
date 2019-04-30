@@ -1,6 +1,5 @@
 import fs from 'fs';
-import path from 'path';
-import { spawn, exec, ExecException } from 'child_process';
+import { exec, ExecException } from 'child_process';
 
 import { AWSError } from 'aws-sdk';
 import S3 from 'aws-sdk/clients/s3';
