@@ -5,13 +5,9 @@ RUN apk add --no-cache \
   nodejs \
   npm \
   zip \
-  unzip \
-  python \
-  py-pip \
-  groff \
-  less
+  unzip
 
-RUN pip install awscli && npm i -g typescript
+RUN npm i -g typescript
 
 WORKDIR /app
 
