@@ -24,6 +24,6 @@ COPY . .
 RUN npm run compile && \
   rm -rf node_modules && \
   npm ci --only=production && \
-  zip -r lambda.blog-publisher.zip lambda.js dist/ bin/ node_modules/
+  zip -r lambda.blog-publisher.zip lambda.js .env.json dist/ bin/ node_modules/ -e dist/cmd
 
 CMD ["bash"]
