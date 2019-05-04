@@ -1,4 +1,3 @@
-import fs from 'fs';
 import { Lambda, AWSError, IAM, S3 } from 'aws-sdk';
 
 import { Command } from './command';
@@ -9,9 +8,6 @@ interface Entity {
 }
 
 export class CreateCommand extends Command {
-
-  private lambdaRoleName = 'LambdaBlogPublisher';
-  private lambdaName = 'BlogPublisher';
 
   private iam: IAM;
   private s3: S3;
@@ -124,10 +120,11 @@ export class CreateCommand extends Command {
         },
         {
           "Action": [
-            "s3:*Object"
+            "s3:*"
           ],
           "Effect": "Allow",
           "Resource": [
+            `arn:aws:s3:::${process.env.WEBSITE_BUCKET}`,
             `arn:aws:s3:::${process.env.WEBSITE_BUCKET}/*`
           ]
         }
@@ -164,17 +161,6 @@ export class CreateCommand extends Command {
         });
       });
     });
-  }
-
-  private async getFunctionCode(): Promise<Buffer> {
-
-    return new Promise((resolve, reject) => {
-
-      fs.readFile('/tmp/lambda.blog-publisher.zip', (err: NodeJS.ErrnoException | null, data: Buffer) => {
-
-        return err ? reject(err) : resolve(data);
-      });
-    })
   }
 
   private async setLambdaPermissions(lambda: Entity): Promise<boolean> {

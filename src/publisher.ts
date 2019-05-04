@@ -69,10 +69,14 @@ export class Publisher {
 
     return new Promise((resolve, reject) => {
 
-      exec(command, (error: ExecException | null, stdout: string) => {
+      exec(command, (error: ExecException | null, stdout: string, stderr: string) => {
 
         if (stdout !== '') {
-          console.log(stdout);
+          console.log(`stdout: ${stdout}`);
+        }
+
+        if (stderr !== '') {
+          console.log(`stderr: ${stderr}`);
         }
 
         return error != null ? reject(error) : resolve(true);

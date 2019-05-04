@@ -1,9 +1,11 @@
 import { resolve } from 'path';
+
 import { config } from 'dotenv';
+import { Lambda } from 'aws-sdk';
 
 import { Command } from './command';
 import { CreateCommand } from "./create.command";
-import { Lambda } from 'aws-sdk';
+import { UpdateCommand } from "./update.command";
 
 const env = config({ path: resolve('./.env') }).parsed;
 
@@ -11,6 +13,9 @@ const getCommand = (alias: string): Command | null => {
   switch (alias) {
     case 'create':
       return new CreateCommand();
+
+    case 'update':
+      return new UpdateCommand();
 
     default:
       return null;
