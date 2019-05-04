@@ -1,11 +1,6 @@
 'use strict';
 
-const dotenv = require('dotenv');
+const { publish } = require('./dist/index');
 
-console.log(dotenv.config().parsed);
-
-
-// const { publish } = require('./dist/index');
-
-// exports.publisher = async () => await publish();
+exports.publisher = async () => await publish();
 // (async () => await publish())();

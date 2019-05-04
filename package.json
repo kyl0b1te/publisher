@@ -4,13 +4,15 @@
   "description": "AWS Lambda for publish hugo generated static content",
   "main": "lambda.js",
   "scripts": {
-    "compile": "tsc && node env.js",
-    "lambda:create": "node dist/cmd/lambda.create.js",
+    "compile": "tsc",
+    "lambda:create": "node dist/cmd/run create",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "zhikiri <zhikiri.dev@gmail.com>",
+  "repository": {},
   "license": "MIT",
   "devDependencies": {
+    "@types/dotenv": "^6.1.1",
     "@types/node": "^11.13.6",
     "aws-sdk": "^2.441.0",
     "dotenv": "^7.0.0"
