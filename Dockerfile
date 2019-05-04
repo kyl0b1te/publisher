@@ -7,19 +7,13 @@ RUN apk add --no-cache \
   zip \
   unzip
 
-RUN npm i -g typescript
-
 WORKDIR /app
 
 COPY package*.json /app/
 
-RUN npm i
-
+RUN npm i -g typescript && npm i
 COPY . .
 
-RUN npm run compile && \
-  rm -rf node_modules && \
-  npm ci --only=production && \
-  zip -r lambda.blog-publisher.zip lambda.js .env.json dist/ bin/ node_modules/ -e dist/cmd
+RUN npm run compile && ./build.sh
 
-CMD ["bash"]
+CMD ["bash", "-c"]
