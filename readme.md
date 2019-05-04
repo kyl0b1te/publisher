@@ -7,3 +7,7 @@ Compile typescript files and prepare lambda function bundle:
 Create lambda function:
 
 `docker run --rm -it publisher bash -c "npm run lambda:create"`
+
+Update lambda function:
+
+`docker run --rm -it publisher bash -c "npm run lambda:update"`
