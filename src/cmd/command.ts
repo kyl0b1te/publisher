@@ -1,9 +1,8 @@
 import fs from 'fs';
-import AWS, { Lambda } from 'aws-sdk';
+import AWS from 'aws-sdk';
 
 export class Command {
   protected lambda: AWS.Lambda;
-  protected env: Lambda.EnvironmentVariables = {};
 
   protected lambdaRoleName = 'LambdaBlogPublisher';
   protected lambdaName = 'BlogPublisher';
@@ -13,12 +12,6 @@ export class Command {
       apiVersion: '2015-03-31',
       region: process.env.WEBSITE_REGION
     });
-  }
-
-  setEnv(env: Lambda.EnvironmentVariables) {
-    delete env['AWS_ACCESS_KEY_ID'];
-    delete env['AWS_SECRET_ACCESS_KEY'];
-    this.env = env;
   }
 
   async run() {

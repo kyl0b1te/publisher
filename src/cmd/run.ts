@@ -31,7 +31,6 @@ const getCommand = (alias: string): Command | null => {
   }
 
   try {
-    command.setEnv(<Lambda.EnvironmentVariables>env);
     await command.run();
   } catch (error) {
 
