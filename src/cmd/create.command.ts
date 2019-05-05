@@ -20,12 +20,10 @@ export class CreateCommand extends Command {
 
   async run(): Promise<any> {
 
-    // const role = { arn: 'arn:aws:iam::702171958721:role/LambdaBlogPublisher', name: this.lambdaRoleName };
     const role = await this.createRole();
 
     await this.setRolePolicy(role.name);
 
-    // const lambda = { arn: 'arn:aws:lambda:eu-west-1:702171958721:function:BlogPublisher', name: this.lambdaName };
     const lambda = await this.createLambda(role.arn);
     await this.setLambdaPermissions(lambda);
     await this.setBucketNotifications(lambda);
@@ -141,11 +139,10 @@ export class CreateCommand extends Command {
         Runtime: 'nodejs8.10',
         Handler: 'lambda.publisher',
         Role: roleArn,
+        Timeout: 30,
+        MemorySize: 128,
         Code: {
           ZipFile: await this.getFunctionCode()
-        },
-        Environment: {
-          Variables: this.env
         }
       };
 
