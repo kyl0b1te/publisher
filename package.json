@@ -4,7 +4,7 @@
   "description": "AWS Lambda for publish hugo generated static content",
   "main": "lambda.js",
   "scripts": {
-    "compile": "tsc",
+    "compile": "rm -rf dist/* && tsc",
     "lambda:create": "node dist/cmd/run create",
     "lambda:update": "./build.sh && node dist/cmd/run update",
     "test": "echo \"Error: no test specified\" && exit 1"
