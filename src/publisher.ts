@@ -33,7 +33,7 @@ export class Publisher {
 
   deployFrom(srcPath: string): Promise<boolean> {
 
-    return this.execute('./bin/s3sync -c env')
+    return this.execute('./bin/bsync -config=env -aws-auth=false')
       .then(() => this.execute(`rm -rf ${srcPath}`));
   }
 
