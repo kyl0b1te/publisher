@@ -28,12 +28,12 @@ export class Publisher {
 
   makeStaticFrom(srcPath: string, website: string, theme: string): Promise<boolean> {
 
-    return this.execute(`./bin/hugo -s ${srcPath} -b ${website} -t ${theme}`);
+    return this.execute(`hugo -s ${srcPath} -b ${website} -t ${theme}`);
   }
 
   deployFrom(srcPath: string): Promise<boolean> {
 
-    return this.execute('./bin/bsync -config=env -aws-auth=false')
+    return this.execute('bsync -config=env -aws-auth=false')
       .then(() => this.execute(`rm -rf ${srcPath}`));
   }
 
