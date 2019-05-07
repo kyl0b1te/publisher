@@ -1,4 +1,3 @@
-
 import { Command } from './command';
 import { Lambda, AWSError } from 'aws-sdk';
 

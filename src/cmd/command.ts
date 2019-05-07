@@ -1,6 +1,8 @@
 import fs from 'fs';
 import AWS from 'aws-sdk';
 
+type Error = NodeJS.ErrnoException | null;
+
 export class Command {
   protected lambda: AWS.Lambda;
 
@@ -20,12 +22,19 @@ export class Command {
 
   protected async getFunctionCode(): Promise<Buffer> {
 
+    return this.getFile('/tmp/lambda.blog-publisher.zip');
+  }
+
+  protected async getDependencies(): Promise<Buffer> {
+
+    return this.getFile('/tmp/dependencies.zip');
+  }
+
+  protected async getFile(path: string): Promise<Buffer> {
+
     return new Promise((resolve, reject) => {
 
-      fs.readFile('/tmp/lambda.blog-publisher.zip', (err: NodeJS.ErrnoException | null, data: Buffer) => {
-
-        return err ? reject(err) : resolve(data);
-      });
+      fs.readFile(path, (err: Error, data: Buffer) => err ? reject(err) : resolve(data));
     })
   }
 }

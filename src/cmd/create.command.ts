@@ -21,11 +21,12 @@ export class CreateCommand extends Command {
   async run(): Promise<any> {
 
     const role = await this.createRole();
-
     await this.setRolePolicy(role.name);
 
-    const lambda = await this.createLambda(role.arn);
+    const layer = await this.createLayer(role);
+    const lambda = await this.createLambda(role, [layer]);
     await this.setLambdaPermissions(lambda);
+
     await this.setBucketNotifications(lambda);
   }
 
@@ -130,7 +131,29 @@ export class CreateCommand extends Command {
     };
   }
 
-  private async createLambda(roleArn: string): Promise<Entity> {
+  private async createLayer(role: Entity): Promise<Entity> {
+
+    return new Promise(async (resolve, reject) => {
+
+      const request: Lambda.PublishLayerVersionRequest = {
+        Content: {
+          ZipFile: await this.getDependencies()
+        },
+        LayerName: this.getLayerName(role),
+        Description: 'Helper binaries for generate static content and sync files with S3 bucket'
+      };
+      return this.lambda.publishLayerVersion(request, (err: AWSError, data: Lambda.PublishLayerVersionResponse) => {
+
+        if (err) {
+          return reject(err);
+        }
+
+        return resolve({ arn: data.LayerArn + '', name: request.LayerName });
+      });
+    });
+  }
+
+  private async createLambda(role: Entity, layers: Entity[]): Promise<Entity> {
 
     return new Promise(async (resolve, reject) => {
 
@@ -138,12 +161,13 @@ export class CreateCommand extends Command {
         FunctionName: this.lambdaName,
         Runtime: 'nodejs8.10',
         Handler: 'lambda.publisher',
-        Role: roleArn,
+        Role: role.arn,
         Timeout: 30,
         MemorySize: 128,
         Code: {
           ZipFile: await this.getFunctionCode()
-        }
+        },
+        Layers: layers.map((layer: Entity) => layer.arn)
       };
 
       this.lambda.createFunction(params, (err: AWSError, data: Lambda.FunctionConfiguration) => {
@@ -208,5 +232,24 @@ export class CreateCommand extends Command {
         }
       ]
     };
+  }
+
+  private getLayerName(role: Entity) {
+
+    const client = this.getClientByRole(role);
+    const { WEBSITE_REGION, HUGO_VERSION, BSYNC_VERSION } = process.env;
+
+    return [
+      'arn:aws:lambda',
+      WEBSITE_REGION,
+      client,
+      'layer',
+      `hugo-${HUGO_VERSION}-bsync-${BSYNC_VERSION}`.replace(/\./g, '')
+    ].join(':');
+  }
+
+  private getClientByRole(role: Entity): string {
+
+    return role.arn.replace('arn:aws:iam::', '').split(':')[0];
   }
 }
