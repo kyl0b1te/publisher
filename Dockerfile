@@ -10,10 +10,13 @@ RUN apk add --no-cache \
   zip \
   curl
 
-WORKDIR /tmp
+WORKDIR /tmp/deps
 
-RUN curl -L https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_${HUGO_VERSION}_Linux-64bit.tar.gz | tar -xz && \
-  curl -L https://github.com/zhikiri/bsync/releases/download/v${BSYNC_VERSION}/${BSYNC_VERSION}-Linux-amd64.tar.gz | tar -xz
+RUN curl -L -o hugo.tar.gz https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_${HUGO_VERSION}_Linux-64bit.tar.gz && \
+  curl -L -o bsync.tar.gz https://github.com/zhikiri/bsync/releases/download/v${BSYNC_VERSION}/${BSYNC_VERSION}-Linux-amd64.tar.gz && \
+  mkdir bin && tar -xzf bsync.tar.gz && tar -xzf hugo.tar.gz && \
+  cp hugo bin/ && cp ${BSYNC_VERSION}-Linux-amd64/bsync bin/ && \
+  zip -r ../dependencies.zip bin/ && rm -rf /tmp/deps
 
 WORKDIR /app
 
