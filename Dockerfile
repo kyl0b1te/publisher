@@ -22,9 +22,9 @@ WORKDIR /app
 
 COPY package*.json /app/
 
-RUN npm i -g typescript && npm i
+RUN npm i
 COPY . .
 
-RUN npm run compile && ./build.sh
+RUN npm run lint && npm run compile && ./build.sh
 
 CMD ["bash", "-c"]
