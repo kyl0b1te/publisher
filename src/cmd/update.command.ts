@@ -3,7 +3,7 @@ import { Lambda, AWSError } from 'aws-sdk';
 
 export class UpdateCommand extends Command {
 
-  async run() {
+  public async run(): Promise<void> {
 
     await this.updateCode();
   }
@@ -17,9 +17,9 @@ export class UpdateCommand extends Command {
         ZipFile: await this.getFunctionCode()
       };
 
-      this.lambda.updateFunctionCode(params, (err: AWSError) => {
+      this.lambda.updateFunctionCode(params, (err: AWSError): void => {
 
-        return err ? reject(err) : resolve(true);
+        err ? reject(err) : resolve(true);
       });
     })
   }

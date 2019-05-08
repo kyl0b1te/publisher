@@ -8,12 +8,12 @@ export class Publisher {
 
   private srcArchivePath = '/tmp/src.zip';
 
-  constructor(
+  public constructor(
     private s3KeyParams: S3.GetObjectRequest,
     private s3Config: S3.ClientConfiguration = { apiVersion: '2006-03-01' }
   ) { }
 
-  async loadTo(srcPath: string): Promise<boolean> {
+  public async loadTo(srcPath: string): Promise<boolean> {
 
     try {
       const data = await this.load(this.s3KeyParams, this.s3Config);
@@ -26,35 +26,35 @@ export class Publisher {
     }
   }
 
-  makeStaticFrom(srcPath: string, website: string, theme: string): Promise<boolean> {
+  public makeStaticFrom(srcPath: string, website: string, theme: string): Promise<boolean> {
 
     return this.execute(`hugo -s ${srcPath} -b ${website} -t ${theme}`);
   }
 
-  deployFrom(srcPath: string): Promise<boolean> {
+  public deployFrom(srcPath: string): Promise<boolean> {
 
     return this.execute('bsync -config=env -aws-auth=false')
-      .then(() => this.execute(`rm -rf ${srcPath}`));
+      .then((): Promise<boolean> => this.execute(`rm -rf ${srcPath}`));
   }
 
   private load(params: S3.GetObjectRequest, config: S3.ClientConfiguration): Promise<S3.Body> {
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, reject): void => {
 
-      (new S3(config)).getObject(params, (err: AWSError, data: S3.GetObjectOutput) => {
+      (new S3(config)).getObject(params, (err: AWSError, data: S3.GetObjectOutput): void => {
 
-        return err != null ? reject(err) : resolve(data.Body);
+        err != null ? reject(err) : resolve(data.Body);
       });
     });
   }
 
   private save(tmpFilePath: string, data: S3.Body): Promise<string> {
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, reject): void => {
 
-      fs.writeFile(tmpFilePath, data, (err) => {
+      fs.writeFile(tmpFilePath, data, (err): void => {
 
-        return err ? reject(err) : resolve(tmpFilePath);
+        err ? reject(err) : resolve(tmpFilePath);
       });
     });
   }
@@ -62,14 +62,14 @@ export class Publisher {
   private unpack(tmpFilePath: string, srcPath: string): Promise<boolean> {
 
     return this.execute(`unzip -o -q ${tmpFilePath} -d ${srcPath}`)
-      .then(() => this.execute(`rm ${tmpFilePath}`));
+      .then((): Promise<boolean> => this.execute(`rm ${tmpFilePath}`));
   }
 
   private execute(command: string): Promise<boolean> {
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, reject): void => {
 
-      exec(command, (error: ExecException | null, stdout: string, stderr: string) => {
+      exec(command, (error: ExecException | null, stdout: string, stderr: string): void => {
 
         if (stdout !== '') {
           console.log(`stdout: ${stdout}`);
@@ -79,7 +79,7 @@ export class Publisher {
           console.log(`stderr: ${stderr}`);
         }
 
-        return error != null ? reject(error) : resolve(true);
+        error != null ? reject(error) : resolve(true);
       });
     });
   }

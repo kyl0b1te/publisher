@@ -3,8 +3,8 @@ import { Lambda, AWSError, IAM, S3 } from 'aws-sdk';
 import { Command } from './command';
 
 interface Entity {
-  arn: string,
-  name: string
+  arn: string;
+  name: string;
 }
 
 export class CreateCommand extends Command {
@@ -12,13 +12,13 @@ export class CreateCommand extends Command {
   private iam: IAM;
   private s3: S3;
 
-  constructor() {
+  public constructor() {
     super();
     this.iam = new IAM();
     this.s3 = new S3();
   }
 
-  async run(): Promise<any> {
+  public async run(): Promise<void> {
 
     const role = await this.createRole();
     await this.setRolePolicy(role.name);
@@ -56,7 +56,7 @@ export class CreateCommand extends Command {
     });
   }
 
-  private getRoleTrustedPolicy(): Object {
+  private getRoleTrustedPolicy(): Record<string, {}> {
 
     return {
       "Version": "2012-10-17",
@@ -92,7 +92,7 @@ export class CreateCommand extends Command {
     });
   }
 
-  private getRolePolicy(): Object {
+  private getRolePolicy(): Record<string, {}> {
 
     return {
       "Version": "2012-10-17",
@@ -148,7 +148,7 @@ export class CreateCommand extends Command {
           return reject(err);
         }
 
-        return resolve({ arn: data.LayerArn + '', name: request.LayerName });
+        return resolve({ arn: data.LayerVersionArn + '', name: request.LayerName });
       });
     });
   }
@@ -159,6 +159,7 @@ export class CreateCommand extends Command {
 
       const params: Lambda.CreateFunctionRequest = {
         FunctionName: this.lambdaName,
+        Description: 'Blog static content generator with deployment',
         Runtime: 'nodejs8.10',
         Handler: 'lambda.publisher',
         Role: role.arn,
@@ -216,7 +217,7 @@ export class CreateCommand extends Command {
     });
   }
 
-  private getBucketNotificationConfiguration(lambda: Entity): Object {
+  private getBucketNotificationConfiguration(lambda: Entity): Record<string, {}> {
 
     return {
       "LambdaFunctionConfigurations": [
@@ -234,7 +235,7 @@ export class CreateCommand extends Command {
     };
   }
 
-  private getLayerName(role: Entity) {
+  private getLayerName(role: Entity): string {
 
     const client = this.getClientByRole(role);
     const { WEBSITE_REGION, HUGO_VERSION, BSYNC_VERSION } = process.env;
@@ -244,7 +245,7 @@ export class CreateCommand extends Command {
       WEBSITE_REGION,
       client,
       'layer',
-      `hugo-${HUGO_VERSION}-bsync-${BSYNC_VERSION}`.replace(/\./g, '')
+      `${HUGO_VERSION}-hugo${BSYNC_VERSION}-bsync`.replace(/\./g, '')
     ].join(':');
   }
 

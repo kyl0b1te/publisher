@@ -9,14 +9,14 @@ export class Command {
   protected lambdaRoleName = 'LambdaBlogPublisher';
   protected lambdaName = 'BlogPublisher';
 
-  constructor() {
+  public constructor() {
     this.lambda = new AWS.Lambda({
       apiVersion: '2015-03-31',
       region: process.env.WEBSITE_REGION
     });
   }
 
-  async run() {
+  public async run(): Promise<void> {
     console.error('run() method should be present in command class');
   }
 
