@@ -7,6 +7,7 @@
     "compile": "rm -rf dist/* && tsc",
     "lambda:create": "node dist/cmd/run create",
     "lambda:update": "./build.sh && node dist/cmd/run update",
+    "lint": "eslint . --ext .ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "zhikiri <zhikiri.dev@gmail.com>",
@@ -15,7 +16,11 @@
   "devDependencies": {
     "@types/dotenv": "^6.1.1",
     "@types/node": "^11.13.6",
-    "aws-sdk": "^2.441.0"
+    "@typescript-eslint/eslint-plugin": "^1.7.0",
+    "@typescript-eslint/parser": "^1.7.0",
+    "aws-sdk": "^2.441.0",
+    "eslint": "^5.16.0",
+    "typescript": "^3.4.5"
   },
   "dependencies": {
     "dotenv": "^7.0.0"
