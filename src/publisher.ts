@@ -10,13 +10,13 @@ export class Publisher {
 
   public constructor(
     private s3KeyParams: S3.GetObjectRequest,
-    private s3Config: S3.ClientConfiguration = { apiVersion: '2006-03-01' }
+    private s3Client: S3
   ) { }
 
   public async loadTo(srcPath: string): Promise<boolean> {
 
     try {
-      const data = await this.load(this.s3KeyParams, this.s3Config);
+      const data = await this.load();
       await this.save(this.srcArchivePath, data);
 
       return await this.unpack(this.srcArchivePath, srcPath);
@@ -37,14 +37,17 @@ export class Publisher {
       .then((): Promise<boolean> => this.execute(`rm -rf ${srcPath}`));
   }
 
-  private load(params: S3.GetObjectRequest, config: S3.ClientConfiguration): Promise<S3.Body> {
+  private load(): Promise<S3.Body> {
 
     return new Promise((resolve, reject): void => {
 
-      (new S3(config)).getObject(params, (err: AWSError, data: S3.GetObjectOutput): void => {
+      this.s3Client.getObject(
+        this.s3KeyParams,
+        (err: AWSError, data: S3.GetObjectOutput): void => {
 
-        err != null ? reject(err) : resolve(data.Body);
-      });
+          err != null ? reject(err) : resolve(data.Body);
+        }
+      );
     });
   }
 

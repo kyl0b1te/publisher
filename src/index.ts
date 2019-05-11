@@ -1,6 +1,7 @@
 import process from 'process';
 
 import { Publisher } from './publisher';
+import { S3 } from 'aws-sdk';
 
 const env = (key: string): string => {
 
@@ -22,10 +23,13 @@ const stopOnFail = (status: boolean, failMessage: string): void => {
 
 export async function publish(): Promise<void> {
 
-  const publisher = new Publisher({
+  const params: S3.GetObjectRequest = {
     Bucket: env('SOURCE_BUCKET'),
-    Key: env('SOURCE_FILENAME'),
-  });
+    Key: env('SOURCE_FILENAME')
+  };
+  const client = new S3({ apiVersion: '2006-03-01' });
+
+  const publisher = new Publisher(params, client);
 
   const tmpSourcePath = '/tmp/src';
 
