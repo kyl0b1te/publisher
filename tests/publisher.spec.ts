@@ -1,8 +1,8 @@
 import fs from 'fs';
 import { expect } from 'chai';
-import aws, { AWSError } from 'aws-sdk';
+import aws from 'aws-sdk';
 
-import { Mock, setMocks } from './aws.mocks';
+import { Mock, newMock, setMocks } from './mocks';
 import { Publisher } from '../src/publisher';
 
 describe('Publisher', () => {
@@ -10,20 +10,22 @@ describe('Publisher', () => {
   const s3KeyParameters: aws.S3.GetObjectRequest = { Key: '', Bucket: '' };
   const s3Client = new aws.S3();
 
-  let mocks: Mock[] = [];
-  const mock = (...list: Mock[]) => {
-    mocks = setMocks(s3Client, ...list);
-  }
-
   let publisher: Publisher;
+
+  let mocks: Mock[] = [];
+  const addMocks = (object: any, ...mocksList: Mock[]) => {
+
+    mocks = setMocks(object, ...mocksList);
+  };
+
   beforeEach(() => {
 
     publisher = new Publisher(s3KeyParameters, s3Client);
-    mocks.map((mock: Mock) => {
-      if (mock.stub) {
-        mock.stub.restore();
-      }
-    });
+  });
+
+  afterEach(() => {
+
+    mocks.map((mock: Mock) => mock.stub && mock.stub.restore());
     mocks = [];
   });
 
@@ -37,7 +39,7 @@ describe('Publisher', () => {
 
     it('should throw an error', () => {
 
-      mock({ method: 'getObject', error: new Error('err'), response: null });
+      addMocks(s3Client, newMock('getObject', new Error('err'), undefined));
       publisher['load']()
         .then((res) => expect(res).to.equal(null))
         .catch((err) => expect(err.message).to.equal('err'))
@@ -46,7 +48,7 @@ describe('Publisher', () => {
     it('should return a data.Body property', async () => {
 
       const response: aws.S3.GetObjectOutput = { Body: 'object-body' };
-      mock({ method: 'getObject', error: null, response });
+      addMocks(s3Client, newMock('getObject', null, response));
       expect(await publisher['load']()).to.equal(response.Body);
     });
   });
@@ -84,5 +86,64 @@ describe('Publisher', () => {
       publisher['execute']('ls')
         .then((res: boolean) => expect(res).to.be.true);
     })
+  });
+
+  describe('#execute method consumers', () => {
+
+    beforeEach(() => {
+
+      addMocks(publisher, newMock('execute', null));
+      mocks[0].stub && mocks[0].stub.resolves(true);
+    });
+
+    describe('#unpack', () => {
+
+      it('should execute valid commands', () => {
+
+        if (!mocks[0].stub) throw new Error('Stub issue detected');
+
+        const file = '/fake/path/file.zip';
+        const dist = '/dist/path';
+
+        publisher['unpack'](file, dist)
+          .then((res: boolean) => expect(res).to.be.true);
+
+        mocks[0].stub.calledOnceWith(`unzip -o -q ${file} -d ${dist}`);
+        mocks[0].stub.calledOnceWith(`rm ${file}`);
+      });
+    });
+
+    describe('#makeStaticFrom', () => {
+
+      it('should execute valid command', () => {
+
+        if (!mocks[0].stub) throw new Error('Stub issue detected');
+
+        const source = '/fake/src/path';
+        const website = 'www.example.com';
+        const theme = 'test';
+
+        publisher.makeStaticFrom(source, website, theme)
+          .then((res: boolean) => expect(res).to.be.true);
+
+        mocks[0].stub.calledOnceWith(`hugo -s -${source} -b ${website} -t ${theme}`);
+      });
+    });
+
+    describe('#deployFrom', () => {
+
+      it('should execute valid command', () => {
+
+        if (!mocks[0].stub) throw new Error('Stub issue detected');
+
+        const source = '/fake/src/path';
+
+        publisher.deployFrom(source)
+          .then((res: boolean) => expect(res).to.be.true);
+
+        mocks[0].stub.calledOnceWith('bsync -config=env -aws-auth=false');
+        mocks[0].stub.calledOnceWith(`rm -rf ${source}`);
+      });
+    });
   });
 });
