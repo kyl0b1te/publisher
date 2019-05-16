@@ -1,3 +1,4 @@
+import fs from 'fs';
 import { expect } from 'chai';
 import aws, { AWSError } from 'aws-sdk';
 
@@ -48,5 +49,40 @@ describe('Publisher', () => {
       mock({ method: 'getObject', error: null, response });
       expect(await publisher['load']()).to.equal(response.Body);
     });
+  });
+
+  describe('#save()', () => {
+
+    it('should throw an error', () => {
+
+      publisher['save']('', '')
+        .then((res) => expect(res).to.equal(null))
+        .catch((err) => expect(err).to.not.null);
+    });
+
+    it('should save content in a file', async () => {
+
+      const data = JSON.stringify({ test: 'a' });
+      const path = await publisher['save']('/tmp/test.json', data);
+
+      const buff = fs.readFileSync(path);
+      expect(buff.toString()).to.be.equal(data);
+    });
+  });
+
+  describe('#execute()', () => {
+
+    it('should throw an error', () => {
+
+      publisher['execute']('invalid command')
+        .then((res) => expect(res).to.equal(false))
+        .catch((err) => expect(err).to.not.null);
+    });
+
+    it('should succeed for valid command', () => {
+
+      publisher['execute']('ls')
+        .then((res: boolean) => expect(res).to.be.true);
+    })
   });
 });

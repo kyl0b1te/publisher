@@ -75,11 +75,11 @@ export class Publisher {
       exec(command, (error: ExecException | null, stdout: string, stderr: string): void => {
 
         if (stdout !== '') {
-          console.log(`stdout: ${stdout}`);
+          // console.log(`stdout: ${stdout}`);
         }
 
         if (stderr !== '') {
-          console.log(`stderr: ${stderr}`);
+          // console.log(`stderr: ${stderr}`);
         }
 
         error != null ? reject(error) : resolve(true);
